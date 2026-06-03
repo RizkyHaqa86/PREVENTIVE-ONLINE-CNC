@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PM Checklist — Angin Bocor MFG1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a1a}
+.app{max-width:520px;margin:0 auto;min-height:100vh}
+/* HEADER */
+.header{background:#185FA5;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header-icon{font-size:22px}
+.header-title{flex:1;font-size:15px;font-weight:600;line-height:1.3}
+.header-sub{font-size:10px;opacity:.7;display:block}
+.step-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block}
+/* STEP DOTS */
+.step-dots{display:flex;gap:5px;justify-content:center;padding:12px 0 4px}
+.dot{width:7px;height:7px;border-radius:50%;background:#CBD5E1;transition:all .3s}
+.dot.active{background:#185FA5;width:22px;border-radius:4px}
+.dot.done{background:#3B6D11}
+/* CARDS */
+.card{background:#fff;border-radius:14px;margin:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+/* FORMS */
+.field-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.field-row.full{grid-template-columns:1fr}
+input[type=text],input[type=time],input[type=date],select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;color:#1a1a1a;-webkit-appearance:none;transition:border-color .2s}
+input:focus,select:focus{outline:none;border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+input[readonly]{background:#f8fafc;color:#64748b}
+/* SEARCH / AUTOCOMPLETE */
+.search-wrap{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #185FA5;border-top:none;border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.autocomplete-item{padding:10px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;gap:8px}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover,.autocomplete-item.selected{background:#EBF4FF}
+.autocomplete-item .ac-no{font-weight:700;color:#185FA5;min-width:40px}
+.autocomplete-item .ac-type{color:#475569;font-size:12px}
+.autocomplete-item .ac-merk{font-size:11px;color:#94a3b8}
+/* MACHINE INFO BAR */
+.machine-bar{background:#EBF4FF;padding:10px 14px;margin:0 10px 6px;border-radius:10px;display:none}
+.machine-bar.show{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.machine-bar-item{font-size:12px;color:#185FA5;display:flex;align-items:center;gap:4px}
+.machine-bar-item strong{color:#0C447C}
+/* PROGRESS */
+.progress-wrap{padding:4px 14px 0}
+.progress-bar{height:5px;background:#e2e8f0;border-radius:3px}
+.progress-fill{height:100%;background:#185FA5;border-radius:3px;transition:width .4s ease}
+.progress-text{font-size:12px;color:#64748b;text-align:center;padding:5px 0 2px}
+/* SECTION HEADERS */
+.section-hdr{background:#f8fafc;padding:9px 16px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:6px}
+/* CHECK ITEMS */
+.check-item{background:#fff;border-bottom:1px solid #f0f2f5;padding:13px 14px}
+.check-item:last-child{border-bottom:none}
+.check-top{display:flex;align-items:center;gap:10px}
+.check-info{flex:1;min-width:0}
+.check-bagian{font-size:10px;color:#94a3b8;margin-bottom:1px;text-transform:uppercase;letter-spacing:.3px}
+.check-point{font-size:14px;font-weight:600;color:#1e293b}
+.check-std{font-size:11px;color:#64748b;margin-top:1px}
+.status-btns{display:flex;gap:5px;flex-shrink:0}
+.sbtn{width:40px;height:40px;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.sbtn:active{transform:scale(.92)}
+.sbtn.ok.sel{background:#dcfce7;border-color:#16a34a}
+.sbtn.perlu.sel{background:#fef3c7;border-color:#d97706}
+.sbtn.na.sel{background:#f1f5f9;border-color:#64748b}
+/* EXPANDABLE DETAIL */
+.check-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0}
+.check-detail.show{display:block}
+.check-detail textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;resize:none;min-height:60px;font-family:inherit;color:#1a1a1a;background:#fff}
+.check-detail textarea:focus{outline:none;border-color:#d97706}
+/* PHOTO */
+.photo-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photo-thumb{width:62px;height:62px;border-radius:8px;object-fit:cover;border:1.5px solid #e2e8f0}
+.photo-add-btn{width:62px;height:62px;border-radius:8px;border:2px dashed #cbd5e1;background:#f8fafc;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;font-size:24px;-webkit-tap-highlight-color:transparent}
+/* SUMMARY */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.stat-cell{background:#f8fafc;border-radius:10px;padding:12px;text-align:center}
+.stat-num{font-size:26px;font-weight:700;line-height:1}
+.stat-lbl{font-size:11px;color:#64748b;margin-top:3px}
+.stat-ok .stat-num{color:#16a34a}
+.stat-perlu .stat-num{color:#d97706}
+.stat-na .stat-num{color:#64748b}
+.stat-pending .stat-num{color:#dc2626}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f2f5}
+.summary-row:last-child{border:none}
+.sr-left{flex:1;min-width:0}
+.sr-bagian{font-size:10px;color:#94a3b8;text-transform:uppercase}
+.sr-point{font-size:13px;font-weight:600;color:#1e293b}
+.sr-note{font-size:11px;color:#d97706;margin-top:1px}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-ok{background:#dcfce7;color:#15803d}
+.badge-perlu{background:#fef3c7;color:#92400e}
+.badge-na{background:#f1f5f9;color:#475569}
+.badge-pending{background:#fee2e2;color:#b91c1c}
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#185FA5;color:#fff}
+.btn-primary:active{background:#0C447C}
+.btn-secondary{background:#fff;color:#475569;border:1.5px solid #e2e8f0}
+.btn-secondary:active{background:#f8fafc}
+.btn-green{background:#15803d;color:#fff}
+.btn-scan{background:#EBF4FF;color:#185FA5;border:1.5px solid #93c5fd;font-size:15px;padding:14px}
+/* FOOTER NAV */
+.footer-nav{position:sticky;bottom:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 14px;display:flex;gap:8px;z-index:10}
+/* SCAN SCREEN */
+.scan-visual{text-align:center;padding:24px 16px 16px}
+.scan-box{width:180px;height:180px;border:3px solid #185FA5;border-radius:14px;margin:0 auto 16px;position:relative;overflow:hidden;background:#EBF4FF;display:flex;align-items:center;justify-content:center}
+.scan-icon-big{font-size:70px}
+.scan-beam{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(24,95,165,.7);animation:beam 2s ease-in-out infinite}
+@keyframes beam{0%,100%{top:0}50%{top:175px}}
+/* SUCCESS SCREEN */
+.success-wrap{text-align:center;padding:30px 16px}
+.success-icon-big{font-size:72px;margin-bottom:14px}
+.done-box{background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px;text-align:left;margin:16px 0}
+.done-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #dcfce7}
+.done-row:last-child{border:none}
+.done-row .dk{color:#15803d;font-weight:600}
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+/* NO DATA */
+.no-machine-badge{background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:13px;margin:0 10px 8px;text-align:center;display:none}
+.no-machine-badge.show{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="header-icon">🔧</span>
+    <div style="flex:1">
+      <span class="header-sub">FM-MTN-10 | MFG 1 | Rev.0</span>
+      <div class="header-title">PM Checklist — Angin Bocor</div>
+    </div>
+    <span class="step-badge" id="step-badge">Langkah 1/4</span>
+  </div>
+
+  <!-- SCREEN 1: PILIH MESIN -->
+  <div class="screen active" id="s1">
+    <div class="step-dots">
+      <div class="dot active" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+      <div class="dot" id="d4"></div>
+    </div>
+
+    <div class="card">
+      <div class="scan-visual">
+        <div class="scan-box">
+          <span class="scan-icon-big">📷</span>
+          <div class="scan-beam"></div>
+        </div>
+        <p style="font-weight:600;font-size:15px;margin-bottom:6px">Scan Barcode Mesin</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px">Gunakan kamera untuk scan barcode<br>yang tertempel di badan mesin</p>
+        <button class="btn btn-scan" onclick="triggerScan()">📷 Buka Scanner Kamera</button>
+      </div>
+      <div style="text-align:center;color:#94a3b8;font-size:12px;margin:4px 0 14px">─── atau ketik nomor mesin ───</div>
+
+      <div class="field-row full" style="margin-bottom:8px">
+        <div>
+          <div class="field-label">Nomor Mesin</div>
+          <div class="search-wrap">
+            <input type="text" id="inp-no" placeholder="Contoh: A01, B12, D05..." oninput="onNoInput(this)" autocomplete="off" autocorrect="off" spellcheck="false">
+            <div class="autocomplete-list" id="ac-list" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-machine-badge" id="no-machine-badge">⚠️ Nomor mesin tidak ditemukan dalam database</div>
+
+      <div class="field-row">
+        <div>
+          <div class="field-label">Type Mesin</div>
+          <input type="text" id="inp-type" placeholder="Otomatis terisi" readonly>
+        </div>
+        <div>
+          <div class="field-label">Merk</div>
+          <input type="text" id="inp-merk" placeholder="Otomatis terisi" readonly>
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <div class="field-label">Serial Number</div>
+          <input type="text" id="inp-sn" placeholder="Otomatis terisi" readonly>
+        </div>
+        <div>
+          <div class="field-label">Tahun</div>
+          <input type="text" id="inp-tahun" placeholder="Otomatis terisi" readonly>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div>
+          <div class="field-label">Tanggal Pemeriksaan</div>
+          <input type="date" id="inp-tgl">
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <button class="btn btn-primary" onclick="goScreen2()">Lanjut ke Checklist ➜</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: CHECKLIST -->
+  <div class="screen" id="s2">
+    <div class="step-dots">
+      <div class="dot done" id="e1"></div>
+      <div class="dot active" id="e2"></div>
+      <div class="dot" id="e3"></div>
+      <div class="dot" id="e4"></div>
+    </div>
+
+    <div class="machine-bar" id="machine-bar">
+      <span class="machine-bar-item">🏭 <strong id="bar-no">—</strong></span>
+      <span class="machine-bar-item">⚙️ <strong id="bar-type">—</strong></span>
+      <span class="machine-bar-item">📅 <strong id="bar-tgl">—</strong></span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="progress-text" id="prog-text">0 dari 17 item selesai</div>
+
+    <div id="checklist-body"></div>
+
+    <div class="card">
+      <div class="field-label" style="margin-bottom:10px">Waktu Pemeriksaan</div>
+      <div class="field-row">
+        <div>
+          <div class="field-label">Start Time</div>
+          <input type="time" id="inp-start">
+        </div>
+        <div>
+          <div class="field-label">Finish Time</div>
+          <input type="time" id="inp-finish">
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <button class="btn btn-secondary" onclick="goTo(1)" style="width:auto;padding:13px 16px">◀</button>
+      <button class="btn btn-primary" onclick="goScreen3()">Lihat Ringkasan ➜</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: RINGKASAN -->
+  <div class="screen" id="s3">
+    <div class="step-dots">
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="card">
+      <p style="font-weight:700;font-size:15px;margin-bottom:12px">📊 Ringkasan Hasil Pemeriksaan</p>
+      <div class="stat-grid">
+        <div class="stat-cell stat-ok"><div class="stat-num" id="sum-ok">0</div><div class="stat-lbl">✅ OK</div></div>
+        <div class="stat-cell stat-perlu"><div class="stat-num" id="sum-perlu">0</div><div class="stat-lbl">⚠️ Perlu Tindakan</div></div>
+        <div class="stat-cell stat-na"><div class="stat-num" id="sum-na">0</div><div class="stat-lbl">— Tidak Ada</div></div>
+        <div class="stat-cell stat-pending"><div class="stat-num" id="sum-pending">0</div><div class="stat-lbl">○ Belum Diisi</div></div>
+      </div>
+    </div>
+
+    <div style="margin:0 10px">
+      <div class="section-hdr">📋 Detail Per Item</div>
+      <div id="summary-list" style="background:#fff;border-radius:0 0 12px 12px;border:1px solid #e2e8f0;border-top:none;padding:0 14px"></div>
+    </div>
+
+    <div class="card">
+      <div class="field-label" style="margin-bottom:8px">Nama PIC / Teknisi</div>
+      <input type="text" id="inp-pic" placeholder="Nama teknisi yang melakukan pemeriksaan">
+    </div>
+
+    <div class="footer-nav">
+      <button class="btn btn-secondary" onclick="goTo(2)" style="width:auto;padding:13px 16px">◀</button>
+      <button class="btn btn-green" onclick="submitLaporan()">💾 Simpan Laporan</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: SELESAI -->
+  <div class="screen" id="s4">
+    <div class="step-dots">
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot done"></div>
+      <div class="dot active"></div>
+    </div>
+    <div class="card">
+      <div class="success-wrap">
+        <div class="success-icon-big">✅</div>
+        <p style="font-size:19px;font-weight:700;margin-bottom:6px">Laporan Tersimpan!</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:4px">Checklist PM angin bocor berhasil disimpan.</p>
+        <div class="done-box" id="done-box"></div>
+        <button class="btn btn-secondary" onclick="downloadCSV()" style="margin-bottom:10px">
+          ⬇️ Download Laporan (CSV)
+        </button>
+        <button class="btn btn-primary" onclick="resetApp()">
+          ➕ Periksa Mesin Berikutnya
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" accept="image/*" capture="environment" id="cam-input" style="display:none">
+
+<script>
+// ========== DATABASE 201 MESIN ==========
+const MACHINES = {
+  'B01': {no:'B01',type:'SB-16 III',merk:'STAR',sn:'0057(001)',tahun:'2020'},
+  'B02': {no:'B02',type:'SB-16 III',merk:'STAR',sn:'0058(001)',tahun:'2020'},
+  'B03': {no:'B03',type:'SB-16 III',merk:'STAR',sn:'0056(001)',tahun:'2020'},
+  'B04': {no:'B04',type:'SB-16 III',merk:'STAR',sn:'0055(001)',tahun:'2020'},
+  'B05': {no:'B05',type:'SB-16 III',merk:'STAR',sn:'0107(004)',tahun:'2021'},
+  'B06': {no:'B06',type:'SB-16 III',merk:'STAR',sn:'0106(004)',tahun:'2021'},
+  'B07': {no:'B07',type:'SB-16 III',merk:'STAR',sn:'0180(011)',tahun:'2022'},
+  'B08': {no:'B08',type:'SB-16 III',merk:'STAR',sn:'0185(012)',tahun:'2022'},
+  'B09': {no:'B09',type:'SB-16 III',merk:'STAR',sn:'0176(011)',tahun:'2022'},
+  'B10': {no:'B10',type:'SB-16 III',merk:'STAR',sn:'0181(012)',tahun:'2022'},
+  'B11': {no:'B11',type:'SB-16 III',merk:'STAR',sn:'0218(015)',tahun:'2023'},
+  'B12': {no:'B12',type:'SB-16 III',merk:'STAR',sn:'0220(015)',tahun:'2023'},
+  'B13': {no:'B13',type:'SB-16 III',merk:'STAR',sn:'0227(016)',tahun:'2022'},
+  'B14': {no:'B14',type:'SB-16 III',merk:'STAR',sn:'0221(016)',tahun:'2023'},
+  'B16': {no:'B16',type:'SB-16 III',merk:'STAR',sn:'0222(016)',tahun:'2023'},
+  'B18': {no:'B18',type:'SB-16 III',merk:'STAR',sn:'0223(016)',tahun:'2023'},
+  'B19': {no:'B19',type:'NN 10 SBII',merk:'NOMURA',sn:'18070104',tahun:'2001'},
+  'B20': {no:'B20',type:'SB-16 III',merk:'STAR',sn:'0224(016)',tahun:'2023'},
+  'B21': {no:'B21',type:'NN 10 SBII',merk:'NOMURA',sn:'18050311',tahun:'2004'},
+  'B22': {no:'B22',type:'SB-16 III',merk:'STAR',sn:'0225(016)',tahun:'2023'},
+  'B23': {no:'B23',type:'NN 10 SBII',merk:'NOMURA',sn:'18030204',tahun:'2002'},
+  'B24': {no:'B24',type:'SB-16 III',merk:'STAR',sn:'0226(016)',tahun:'2023'},
+  'B25': {no:'B25',type:'NN 10 SBII',merk:'NOMURA',sn:'18090312',tahun:'2004'},
+  'B26': {no:'B26',type:'SB-16 TYPE C',merk:'STAR',sn:'3481(185)',tahun:'2010'},
+  'B27': {no:'B27',type:'NN 10 SBII',merk:'NOMURA',sn:'18050310',tahun:'2001'},
+  'B28': {no:'B28',type:'SB-16 TYPE C',merk:'STAR',sn:'3482(185)',tahun:'2010'},
+  'B29': {no:'B29',type:'NN 10 SBII',merk:'NOMURA',sn:'18040211',tahun:'2002'},
+  'B30': {no:'B30',type:'SR-10 J TYPE C',merk:'STAR',sn:'4453(274)',tahun:'2024'},
+  'B31': {no:'B31',type:'SR-20 J TYPE C',merk:'STAR',sn:'4516(229)',tahun:'2017'},
+  'B32': {no:'B32',type:'SB-16 TYPE C',merk:'STAR',sn:'3477(185)',tahun:'2010'},
+  'B33': {no:'B33',type:'SR-10 J TYPE S',merk:'STAR',sn:'0690(044)',tahun:'2010'},
+  'B34': {no:'B34',type:'SB-16 TYPE C',merk:'STAR',sn:'3478(185)',tahun:'2010'},
+  'B35': {no:'B35',type:'SR-10 J TYPE S',merk:'STAR',sn:'0691(044)',tahun:'2010'},
+  'B36': {no:'B36',type:'SB-16 TYPE C',merk:'STAR',sn:'2099(104)',tahun:'2006'},
+  'B37': {no:'B37',type:'SR-10 J TYPE S',merk:'STAR',sn:'0692(044)',tahun:'2010'},
+  'B38': {no:'B38',type:'SB-16 TYPE D',merk:'STAR',sn:'0314(013)',tahun:'2007'},
+  'B39': {no:'B39',type:'SR-10 J TYPE C',merk:'STAR',sn:'0944(062)',tahun:'2008'},
+  'B40': {no:'B40',type:'SB-16 TYPE D',merk:'STAR',sn:'0313(013)',tahun:'2010'},
+  'B41': {no:'B41',type:'SR-10 J TYPE C',merk:'STAR',sn:'0945(062)',tahun:'2008'},
+  'B42': {no:'B42',type:'SB-16 TYPE D',merk:'STAR',sn:'1455(065)',tahun:'2010'},
+  'B43': {no:'B43',type:'SR-10 J TYPE C',merk:'STAR',sn:'0946(062)',tahun:'2008'},
+  'B44': {no:'B44',type:'SB-16 TYPE D',merk:'STAR',sn:'1444(065)',tahun:'2010'},
+  'B45': {no:'B45',type:'SR-10 J TYPE C',merk:'STAR',sn:'0947(062)',tahun:'2008'},
+  'B46': {no:'B46',type:'SB-16 TYPE D',merk:'STAR',sn:'1450(065)',tahun:'2010'},
+  'B47': {no:'B47',type:'SR-10 J TYPE C',merk:'STAR',sn:'0948(062)',tahun:'2008'},
+  'B48': {no:'B48',type:'SB-16 TYPE E',merk:'STAR',sn:'1331(059)',tahun:'2009'},
+  'B49': {no:'B49',type:'SR-10 J TYPE C',merk:'STAR',sn:'2317(165)',tahun:'2013'},
+  'B50': {no:'B50',type:'SB-16 TYPE E',merk:'STAR',sn:'1332(059)',tahun:'2009'},
+  'B51': {no:'B51',type:'SR-10 J TYPE C',merk:'STAR',sn:'2318(165)',tahun:'2013'},
+  'B52': {no:'B52',type:'SR-10 J TYPE C',merk:'STAR',sn:'4444(274)',tahun:'2024'},
+  'B53': {no:'B53',type:'SR-10 J TYPE C',merk:'STAR',sn:'2195(158)',tahun:'2013'},
+  'B54': {no:'B54',type:'SR-10 J TYPE C',merk:'STAR',sn:'4451(274)',tahun:'2024'},
+  'B55': {no:'B55',type:'SR-10 J TYPE C',merk:'STAR',sn:'2200(159)',tahun:'2013'},
+  'B56': {no:'B56',type:'SR-10 J TYPE C',merk:'STAR',sn:'2829(190)',tahun:'2016'},
+  'B57': {no:'B57',type:'SR-10 J TYPE C',merk:'STAR',sn:'2836(191)',tahun:'2016'},
+  'B58': {no:'B58',type:'SR-10 J TYPE C',merk:'STAR',sn:'2826(190)',tahun:'2016'},
+  'B59': {no:'B59',type:'SR-10 J TYPE C',merk:'STAR',sn:'2830(190)',tahun:'2016'},
+  'B60': {no:'B60',type:'SR-10 J TYPE C',merk:'STAR',sn:'3858(243)',tahun:'2021'},
+  'B61': {no:'B61',type:'SR-10 J TYPE C',merk:'STAR',sn:'3859(243)',tahun:'2021'},
+  'B62': {no:'B62',type:'SR-10 J TYPE C',merk:'STAR',sn:'3827(242)',tahun:'2021'},
+  'B63': {no:'B63',type:'SR-10 J TYPE C',merk:'STAR',sn:'3857(243)',tahun:'2021'},
+  'B64': {no:'B64',type:'SR-10 J TYPE C',merk:'STAR',sn:'3419(220)',tahun:'2019'},
+  'B65': {no:'B65',type:'SR-10 J TYPE C',merk:'STAR',sn:'3418(220)',tahun:'2019'},
+  'B66': {no:'B66',type:'SR-10 J TYPE C',merk:'STAR',sn:'3423(220)',tahun:'2019'},
+  'B67': {no:'B67',type:'SR-10 J TYPE C',merk:'STAR',sn:'3426(220)',tahun:'2019'},
+  'B68': {no:'B68',type:'SR-10 J TYPE C',merk:'STAR',sn:'3428(220)',tahun:'2019'},
+  'B69': {no:'B69',type:'SR-10 J TYPE C',merk:'STAR',sn:'3427(220)',tahun:'2019'},
+  'B70': {no:'B70',type:'SR-10 J TYPE C',merk:'STAR',sn:'4448(274)',tahun:'2024'},
+  'B71': {no:'B71',type:'SR-10 J TYPE C',merk:'STAR',sn:'4281(266)',tahun:'2023'},
+  'B72': {no:'B72',type:'SR-10 J TYPE C',merk:'STAR',sn:'4454(274)',tahun:'2024'},
+  'B73': {no:'B73',type:'SR-10 J TYPE C',merk:'STAR',sn:'4452(274)',tahun:'2024'},
+  'A01': {no:'A01',type:'SR-20 R II',merk:'STAR',sn:'1046(101)',tahun:'2005'},
+  'A02': {no:'A02',type:'SR-20 R II',merk:'STAR',sn:'1045(101)',tahun:'2005'},
+  'A03': {no:'A03',type:'SR-32 J',merk:'STAR',sn:'3295(354)',tahun:'2016'},
+  'A04': {no:'A04',type:'SR-32 J',merk:'STAR',sn:'0850(157)',tahun:'2008'},
+  'A05': {no:'A05',type:'SB-20 R TYPE G',merk:'STAR',sn:'3688(197)',tahun:'2018'},
+  'A06': {no:'A06',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1750(093)',tahun:'2023'},
+  'A07': {no:'A07',type:'SB-20 R TYPE G',merk:'STAR',sn:'3724(199)',tahun:'2018'},
+  'A08': {no:'A08',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1749(093)',tahun:'2023'},
+  'A09': {no:'A09',type:'SB-20 R TYPE G',merk:'STAR',sn:'3723(199)',tahun:'2018'},
+  'A10': {no:'A10',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1553(083)',tahun:'2023'},
+  'A11': {no:'A11',type:'SB-20 R TYPE G',merk:'STAR',sn:'3687(197)',tahun:'2018'},
+  'A12': {no:'A12',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1682(090)',tahun:'2023'},
+  'A13': {no:'A13',type:'SR-20 J TYPE C',merk:'STAR',sn:'5664(295)',tahun:'2019'},
+  'A14': {no:'A14',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1686(090)',tahun:'2023'},
+  'A15': {no:'A15',type:'SR-20 J TYPE C',merk:'STAR',sn:'4517(229)',tahun:'2017'},
+  'A16': {no:'A16',type:'SR-20 J TYPE C',merk:'STAR',sn:'4166(211)',tahun:'2016'},
+  'A17': {no:'A17',type:'SR-20 J TYPE N',merk:'STAR',sn:'4021(203)',tahun:'2016'},
+  'A18': {no:'A18',type:'SR-20 J TYPE C',merk:'STAR',sn:'4168(211)',tahun:'2016'},
+  'A19': {no:'A19',type:'SR-20 J TYPE N',merk:'STAR',sn:'4022(203)',tahun:'2016'},
+  'A20': {no:'A20',type:'SR-20 J TYPE C',merk:'STAR',sn:'4167(211)',tahun:'2016'},
+  'A21': {no:'A21',type:'SR-20 J TYPE C',merk:'STAR',sn:'3566(175)',tahun:'2015'},
+  'A22': {no:'A22',type:'SR-20 J TYPE C',merk:'STAR',sn:'3612(177)',tahun:'2015'},
+  'A23': {no:'A23',type:'SR-20 J TYPE C',merk:'STAR',sn:'3580(175)',tahun:'2015'},
+  'A24': {no:'A24',type:'SR-20 J TYPE C',merk:'STAR',sn:'3582(176)',tahun:'2015'},
+  'A25': {no:'A25',type:'SR-20 J TYPE C',merk:'STAR',sn:'3581(176)',tahun:'2015'},
+  'A26': {no:'A26',type:'SR-20 J TYPE C',merk:'STAR',sn:'3615(177)',tahun:'2015'},
+  'A27': {no:'A27',type:'SR-20 J TYPE C',merk:'STAR',sn:'5665(295)',tahun:'2019'},
+  'A28': {no:'A28',type:'SR-20 J II TYPE A',merk:'STAR',sn:'0512(031)',tahun:'2021'},
+  'A29': {no:'A29',type:'SR-20 J II TYPE A',merk:'STAR',sn:'1460(079)',tahun:'2023'},
+  'A30': {no:'A30',type:'SR-20 J II TYPE A',merk:'STAR',sn:'0513(031)',tahun:'2021'},
+  'A31': {no:'A31',type:'SB-16 R TYPE G',merk:'STAR',sn:'13848(716)',tahun:'2023'},
+  'A32': {no:'A32',type:'SB-16 II TYPE E',merk:'STAR',sn:'1302(066)',tahun:'2013'},
+  'A33': {no:'A33',type:'SB-16 II TYPE E',merk:'STAR',sn:'1370(069)',tahun:'2014'},
+  'A34': {no:'A34',type:'SB-16 II TYPE E',merk:'STAR',sn:'1301(066)',tahun:'2013'},
+  'A35': {no:'A35',type:'SB-16 II TYPE E',merk:'STAR',sn:'1369(069)',tahun:'2014'},
+  'A36': {no:'A36',type:'SB-16 II TYPE E',merk:'STAR',sn:'1296(065)',tahun:'2013'},
+  'A37': {no:'A37',type:'SB-16 II TYPE E',merk:'STAR',sn:'1382(071)',tahun:'2014'},
+  'A38': {no:'A38',type:'SB-16 II TYPE E',merk:'STAR',sn:'1383(071)',tahun:'2014'},
+  'A39': {no:'A39',type:'SB-20 R TYPE G',merk:'STAR',sn:'3821(204)',tahun:'2018'},
+  'A40': {no:'A40',type:'SB-20 R TYPE G',merk:'STAR',sn:'3917(210)',tahun:'2018'},
+  'A41': {no:'A41',type:'SB-16 R TYPE G',merk:'STAR',sn:'5458(291)',tahun:'2019'},
+  'A42': {no:'A42',type:'SB-20 R TYPE G',merk:'STAR',sn:'5231(279)',tahun:'2019'},
+  'A43': {no:'A43',type:'SB-16 R TYPE G',merk:'STAR',sn:'5457(291)',tahun:'2019'},
+  'A44': {no:'A44',type:'SB-20 R TYPE G',merk:'STAR',sn:'5228(279)',tahun:'2019'},
+  'A45': {no:'A45',type:'SB-16 R TYPE G',merk:'STAR',sn:'5459(291)',tahun:'2019'},
+  'A46': {no:'A46',type:'SB-20 R TYPE G',merk:'STAR',sn:'5229(279)',tahun:'2019'},
+  'A47': {no:'A47',type:'SB-16 R TYPE G',merk:'STAR',sn:'5460(291)',tahun:'2019'},
+  'A48': {no:'A48',type:'SB-20 R TYPE G',merk:'STAR',sn:'5230(279)',tahun:'2019'},
+  'A49': {no:'A49',type:'SR-32 J II TYPE B',merk:'STAR',sn:'0654(079)',tahun:'2020'},
+  'A50': {no:'A50',type:'SB-20 TYPE E',merk:'STAR',sn:'1250(061)',tahun:'2013'},
+  'A51': {no:'A51',type:'SR-32 J II TYPE B',merk:'STAR',sn:'0784(093)',tahun:'2021'},
+  'A52': {no:'A52',type:'SB-20 TYPE E',merk:'STAR',sn:'1246(061)',tahun:'2013'},
+  'A53': {no:'A53',type:'SR-32 J II TYPE B',merk:'STAR',sn:'0235(031)',tahun:'2018'},
+  'D01': {no:'D01',type:'B12E-1F5',merk:'CINCOM',sn:'AE5297',tahun:'2023'},
+  'D02': {no:'D02',type:'B12E-1F5',merk:'CINCOM',sn:'AE5296',tahun:'2023'},
+  'D03': {no:'D03',type:'A12VP',merk:'CINCOM',sn:'AA2530',tahun:'2008'},
+  'D04': {no:'D04',type:'A12VP',merk:'CINCOM',sn:'AA2529',tahun:'2008'},
+  'D05': {no:'D05',type:'A12VNP',merk:'CINCOM',sn:'AD1463',tahun:'2011'},
+  'D06': {no:'D06',type:'A12VNP',merk:'CINCOM',sn:'AD2466',tahun:'2014'},
+  'D07': {no:'D07',type:'A12VNP',merk:'CINCOM',sn:'AD1469',tahun:'2014'},
+  'D08': {no:'D08',type:'A12VNP',merk:'CINCOM',sn:'AD2465',tahun:'2011'},
+  'D09': {no:'D09',type:'A12VNP',merk:'CINCOM',sn:'AD1470',tahun:'2014'},
+  'D10': {no:'D10',type:'A12VNP',merk:'CINCOM',sn:'AD2470',tahun:'2014'},
+  'D11': {no:'D11',type:'A12VNP',merk:'CINCOM',sn:'AD2469',tahun:'2014'},
+  'D12': {no:'D12',type:'A12VNP',merk:'CINCOM',sn:'AD2471',tahun:'2014'},
+  'D13': {no:'D13',type:'A12VNP',merk:'CINCOM',sn:'AD2467',tahun:'2014'},
+  'D14': {no:'D14',type:'A12VNP',merk:'CINCOM',sn:'AD2468',tahun:'2014'},
+  'D15': {no:'D15',type:'B12 EV',merk:'CINCOM',sn:'AE1647',tahun:'2018'},
+  'D16': {no:'D16',type:'A12VNP',merk:'CINCOM',sn:'AD1466',tahun:'2011'},
+  'D17': {no:'D17',type:'B12 EV',merk:'CINCOM',sn:'AE1648',tahun:'2018'},
+  'D18': {no:'D18',type:'A12VNP',merk:'CINCOM',sn:'AD1468',tahun:'2011'},
+  'D19': {no:'D19',type:'B12 EV',merk:'CINCOM',sn:'AE1646',tahun:'2018'},
+  'D20': {no:'D20',type:'B12 EV',merk:'CINCOM',sn:'AE-1029',tahun:'2014'},
+  'D21': {no:'D21',type:'B12 EV',merk:'CINCOM',sn:'AE1649',tahun:'2018'},
+  'D22': {no:'D22',type:'B12 EV',merk:'CINCOM',sn:'AE-1028',tahun:'2014'},
+  'D23': {no:'D23',type:'A12VNP',merk:'CINCOM',sn:'AD1465',tahun:'2011'},
+  'D24': {no:'D24',type:'A12VNP',merk:'CINCOM',sn:'AD1467',tahun:'2011'},
+  'D25': {no:'D25',type:'A12VNP',merk:'CINCOM',sn:'AD1471',tahun:'2011'},
+  'D26': {no:'D26',type:'A12VNP',merk:'CINCOM',sn:'AD1472',tahun:'2011'},
+  'D27': {no:'D27',type:'B12',merk:'CINCOM',sn:'Z12026',tahun:'1999'},
+  'D28': {no:'D28',type:'A12VNP',merk:'CINCOM',sn:'AD1464',tahun:'2011'},
+  'D29': {no:'D29',type:'B12',merk:'CINCOM',sn:'Z12433',tahun:'1999'},
+  'D30': {no:'D30',type:'B12 VIN',merk:'CINCOM',sn:'Z-16269',tahun:'2004'},
+  'D31': {no:'D31',type:'B12',merk:'CINCOM',sn:'Z4495',tahun:'1998'},
+  'D32': {no:'D32',type:'B12',merk:'CINCOM',sn:'Z-12832',tahun:'2000'},
+  'D33': {no:'D33',type:'B12',merk:'CINCOM',sn:'Z15197',tahun:'2002'},
+  'D34': {no:'D34',type:'B12N',merk:'CINCOM',sn:'Z-16041',tahun:'2003'},
+  'D35': {no:'D35',type:'B12 VIN',merk:'CINCOM',sn:'Z-16268',tahun:'2004'},
+  'D36': {no:'D36',type:'B12N',merk:'CINCOM',sn:'Z-16040',tahun:'2003'},
+  'D37': {no:'D37',type:'B12E-1F5',merk:'CINCOM',sn:'AE5301',tahun:'2024'},
+  'D38': {no:'D38',type:'B12E-1F5',merk:'CINCOM',sn:'AE5302',tahun:'2024'},
+  'D39': {no:'D39',type:'B12E-1F5',merk:'CINCOM',sn:'AE5300',tahun:'2024'},
+  'D40': {no:'D40',type:'B12E-1F5',merk:'CINCOM',sn:'AE5303',tahun:'2024'},
+  'D41': {no:'D41',type:'SA-16',merk:'STAR',sn:'0867(062)',tahun:'2003'},
+  'D42': {no:'D42',type:'SE-12',merk:'STAR',sn:'1046(062)',tahun:'2000'},
+  'D43': {no:'D43',type:'SA-16',merk:'STAR',sn:'0868(062)',tahun:'2003'},
+  'D44': {no:'D44',type:'SE-12',merk:'STAR',sn:'1050(062)',tahun:'2000'},
+  'D45': {no:'D45',type:'SA-16',merk:'STAR',sn:'0866(062)',tahun:'2003'},
+  'D46': {no:'D46',type:'SR-20 R',merk:'STAR',sn:'1258(125)',tahun:'2002'},
+  'D47': {no:'D47',type:'SR-20 R',merk:'STAR',sn:'1255(125)',tahun:'2002'},
+  'D48': {no:'D48',type:'SR-20 R',merk:'STAR',sn:'0669(066)',tahun:'2000'},
+  'D49': {no:'D49',type:'SR-20 R',merk:'STAR',sn:'0668(066)',tahun:'2000'},
+  'D50': {no:'D50',type:'SB-20 R TYPE G',merk:'STAR',sn:'15993(823)',tahun:'2024'},
+  'D51': {no:'D51',type:'SB-20 R TYPE G',merk:'STAR',sn:'16309(839)',tahun:'2024'},
+  'D52': {no:'D52',type:'SB-20 R TYPE G',merk:'STAR',sn:'16310(839)',tahun:'2024'},
+  'D53': {no:'D53',type:'SB-20 R TYPE G',merk:'STAR',sn:'16331(840)',tahun:'2024'},
+  'D54': {no:'D54',type:'SB-20 R TYPE G',merk:'STAR',sn:'16335(840)',tahun:'2024'},
+  'C01': {no:'C01',type:'SJ-8R',merk:'STAR',sn:'836348',tahun:'1983'},
+  'C02': {no:'C02',type:'SJ-8R',merk:'STAR',sn:'867214',tahun:'1986'},
+  'C03': {no:'C03',type:'SJ-8R',merk:'STAR',sn:'836388',tahun:'1983'},
+  'C04': {no:'C04',type:'SJ-8R',merk:'STAR',sn:'857027',tahun:'1985'},
+  'C05': {no:'C05',type:'NS-P 1653',merk:'NOMURA',sn:'790247',tahun:'1979'},
+  'C06': {no:'C06',type:'NS-P 10530',merk:'NOMURA',sn:'850125',tahun:'1985'},
+  'C07': {no:'C07',type:'NS-P 10530',merk:'NOMURA',sn:'820820',tahun:'1982'},
+  'C08': {no:'C08',type:'NS-P 10530',merk:'NOMURA',sn:'70631',tahun:'1995'},
+  'C09': {no:'C09',type:'NS-P 1653',merk:'NOMURA',sn:'A10861',tahun:'1986'},
+  'C10': {no:'C10',type:'NS-P 10530',merk:'NOMURA',sn:'810544',tahun:'1981'},
+  'C11': {no:'C11',type:'NS-P 10530',merk:'NOMURA',sn:'810118',tahun:'1981'},
+  'C12': {no:'C12',type:'NS-P 10530',merk:'NOMURA',sn:'826152',tahun:'1982'},
+  'C13': {no:'C13',type:'NS-P 1653',merk:'NOMURA',sn:'830422',tahun:'1983'},
+  'C14': {no:'C14',type:'NS-P 10530',merk:'NOMURA',sn:'830514',tahun:'1983'},
+  'C15': {no:'C15',type:'NS-P 10530',merk:'NOMURA',sn:'820125',tahun:'1982'},
+  'C17': {no:'C17',type:'NS-P 10530',merk:'NOMURA',sn:'800515',tahun:'1980'},
+  'C18': {no:'C18',type:'NS-P 10530',merk:'NOMURA',sn:'781225',tahun:'1978'},
+  'C19': {no:'C19',type:'NS-P 10530',merk:'NOMURA',sn:'A10727',tahun:'1980'},
+  'C21': {no:'C21',type:'NS-P 1053A',merk:'NOMURA',sn:'891213',tahun:'1989'},
+  'C22': {no:'C22',type:'NS-P 10530',merk:'NOMURA',sn:'780143',tahun:'1978'},
+  'SQ01': {no:'SQ01',type:'G05',merk:'WASINO',sn:'1948',tahun:'2006'},
+  'SQ02': {no:'SQ02',type:'NUCBOY-8EX',merk:'EGURO',sn:'4020',tahun:'2022'},
+  'SQ04': {no:'SQ04',type:'NUCBOY-8EX',merk:'EGURO',sn:'4019',tahun:'2022'}
+};
+
+// ========== CHECKLIST ITEMS ==========
+const CHECKS = [
+  {bagian:'Solenoid Mesin',   point:'Solenoid Unit', std:'Tidak Bocor'},
+  {bagian:'Solenoid Mesin',   point:'Fitting',       std:'Tidak Bocor'},
+  {bagian:'Solenoid Mesin',   point:'Selang Angin',  std:'Tidak Bocor'},
+  {bagian:'Regulator Mesin',  point:'Regulator Unit',std:'Tidak Bocor'},
+  {bagian:'Regulator Mesin',  point:'Fitting',       std:'Tidak Bocor'},
+  {bagian:'Regulator Mesin',  point:'Coupler',       std:'Tidak Bocor'},
+  {bagian:'Solenoid Bartop',  point:'Solenoid Unit', std:'Tidak Bocor'},
+  {bagian:'Solenoid Bartop',  point:'Fitting',       std:'Tidak Bocor'},
+  {bagian:'Solenoid Bartop',  point:'Selang Angin',  std:'Tidak Bocor'},
+  {bagian:'Regulator Bartop', point:'Regulator Unit',std:'Tidak Bocor'},
+  {bagian:'Regulator Bartop', point:'Fitting',       std:'Tidak Bocor'},
+  {bagian:'Regulator Bartop', point:'Coupler',       std:'Tidak Bocor'},
+  {bagian:'Percabangan Selang',point:'Fitting',      std:'Tidak Bocor'},
+  {bagian:'Percabangan Selang',point:'Selang Angin', std:'Tidak Bocor'},
+  {bagian:'Cylinder',         point:'Cylinder Unit', std:'Tidak Bocor'},
+  {bagian:'Cylinder',         point:'Fitting',       std:'Tidak Bocor'},
+  {bagian:'Air Gun',          point:'Airgun Unit',   std:'Tidak Bocor'}
+];
+
+// ========== STATE ==========
+let ST = {results:{}, notes:{}, photos:{}};
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', ()=>{
+  const d = new Date();
+  document.getElementById('inp-tgl').value = d.toISOString().split('T')[0];
+  document.getElementById('inp-start').value = d.toTimeString().slice(0,5);
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.search-wrap')) hideAC();
+  });
+});
+
+// ========== AUTOCOMPLETE ==========
+function onNoInput(inp) {
+  const q = inp.value.trim().toUpperCase();
+  clearMachineFields();
+  document.getElementById('no-machine-badge').classList.remove('show');
+  if(q.length < 1) { hideAC(); return; }
+  const matches = Object.values(MACHINES).filter(m =>
+    m.no.startsWith(q) || m.no.includes(q)
+  ).slice(0, 8);
+  if(matches.length === 0) { hideAC(); return; }
+  const list = document.getElementById('ac-list');
+  list.innerHTML = matches.map(m =>
+    `<div class="autocomplete-item" onclick="selectMachine('${m.no}')">
+      <span class="ac-no">${m.no}</span>
+      <span class="ac-type">${m.type}</span>
+      <span class="ac-merk">${m.merk}</span>
+    </div>`
+  ).join('');
+  list.style.display = 'block';
+}
+
+function hideAC() {
+  document.getElementById('ac-list').style.display = 'none';
+}
+
+function selectMachine(no) {
+  const m = MACHINES[no];
+  if(!m) return;
+  document.getElementById('inp-no').value = m.no;
+  document.getElementById('inp-type').value = m.type;
+  document.getElementById('inp-merk').value = m.merk;
+  document.getElementById('inp-sn').value = m.sn;
+  document.getElementById('inp-tahun').value = m.tahun;
+  hideAC();
+}
+
+function clearMachineFields() {
+  ['inp-type','inp-merk','inp-sn','inp-tahun'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+// ========== SCAN ==========
+function triggerScan() {
+  // Try to use barcode scanning via URL scheme or fallback
+  const inp = document.getElementById('cam-input');
+  inp.capture = 'environment';
+  // On real implementation, integrate with a barcode library
+  // For now, prompt user to type after photo
+  showToast('Pada implementasi nyata: gunakan library html5-qrcode untuk scan barcode');
+  // Demo: let user pick from list
+  const no = prompt('Masukkan No. Mesin (contoh: A01, B12, D05):');
+  if(no) {
+    const key = no.trim().toUpperCase();
+    document.getElementById('inp-no').value = key;
+    if(MACHINES[key]) {
+      selectMachine(key);
+      showToast('✅ Mesin ' + key + ' ditemukan!');
+    } else {
+      clearMachineFields();
+      document.getElementById('no-machine-badge').classList.add('show');
+    }
+  }
+}
+
+// ========== NAVIGATION ==========
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i===n-1));
+  document.getElementById('step-badge').textContent = `Langkah ${n}/4`;
+  window.scrollTo(0,0);
+}
+
+function goScreen2() {
+  const no = document.getElementById('inp-no').value.trim().toUpperCase();
+  if(!no) { showToast('⚠️ Pilih nomor mesin terlebih dahulu'); return; }
+  const m = MACHINES[no];
+  if(!m && !document.getElementById('inp-type').value) {
+    showToast('⚠️ Nomor mesin tidak ada di database, isi type manual'); return;
+  }
+  // update bar
+  document.getElementById('bar-no').textContent = no;
+  document.getElementById('bar-type').textContent = document.getElementById('inp-type').value || '-';
+  const tgl = document.getElementById('inp-tgl').value;
+  if(tgl) document.getElementById('bar-tgl').textContent = new Date(tgl+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('machine-bar').classList.add('show');
+  buildChecklist();
+  goTo(2);
+}
+
+function goScreen3() {
+  buildSummary();
+  goTo(3);
+}
+
+// ========== CHECKLIST ==========
+function buildChecklist() {
+  const body = document.getElementById('checklist-body');
+  body.innerHTML = '';
+  let lastBagian = '';
+  CHECKS.forEach((c,i) => {
+    if(c.bagian !== lastBagian) {
+      lastBagian = c.bagian;
+      const hdr = document.createElement('div');
+      hdr.className = 'section-hdr';
+      hdr.textContent = '⚙ ' + c.bagian;
+      body.appendChild(hdr);
+    }
+    const item = document.createElement('div');
+    item.className = 'check-item';
+    const s = ST.results[i] || '';
+    item.innerHTML = `
+      <div class="check-top">
+        <div class="check-info">
+          <div class="check-bagian">${c.bagian}</div>
+          <div class="check-point">${c.point}</div>
+          <div class="check-std">Std: ${c.std}</div>
+        </div>
+        <div class="status-btns">
+          <button class="sbtn ok${s==='ok'?' sel':''}" onclick="setStatus(${i},'ok',this)" title="OK">✓</button>
+          <button class="sbtn perlu${s==='perlu'?' sel':''}" onclick="setStatus(${i},'perlu',this)" title="Perlu Tindakan">⚠</button>
+          <button class="sbtn na${s==='na'?' sel':''}" onclick="setStatus(${i},'na',this)" title="Tidak Ada">—</button>
+        </div>
+      </div>
+      <div class="check-detail${s==='perlu'?' show':''}" id="det-${i}">
+        <textarea placeholder="Keterangan abnormality..." oninput="ST.notes[${i}]=this.value">${ST.notes[i]||''}</textarea>
+        <div class="photo-row" id="phrow-${i}">
+          <div class="photo-add-btn" onclick="addPhoto(${i})" title="Foto">📷</div>
+        </div>
+      </div>`;
+    body.appendChild(item);
+    if(ST.photos[i] && ST.photos[i].length) renderPhotos(i);
+  });
+  updateProgress();
+}
+
+function setStatus(idx, status, btn) {
+  ST.results[idx] = status;
+  btn.closest('.status-btns').querySelectorAll('.sbtn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const det = document.getElementById('det-'+idx);
+  if(det) det.classList.toggle('show', status==='perlu');
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = Object.keys(ST.results).length;
+  const pct = Math.round(done/CHECKS.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-text').textContent = `${done} dari ${CHECKS.length} item selesai`;
+}
+
+function addPhoto(idx) {
+  const inp = document.getElementById('cam-input');
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if(!ST.photos[idx]) ST.photos[idx]=[];
+      ST.photos[idx].push(ev.target.result);
+      renderPhotos(idx);
+    };
+    reader.readAsDataURL(file);
+    inp.value='';
+  };
+  inp.click();
+}
+
+function renderPhotos(idx) {
+  const row = document.getElementById('phrow-'+idx);
+  if(!row) return;
+  row.innerHTML='';
+  (ST.photos[idx]||[]).forEach((src,pi) => {
+    const img = document.createElement('img');
+    img.src=src; img.className='photo-thumb'; img.alt='Foto '+pi;
+    row.appendChild(img);
+  });
+  const addBtn = document.createElement('div');
+  addBtn.className='photo-add-btn'; addBtn.textContent='📷';
+  addBtn.onclick=()=>addPhoto(idx);
+  row.appendChild(addBtn);
+}
+
+// ========== SUMMARY ==========
+function buildSummary() {
+  const ok=Object.values(ST.results).filter(v=>v==='ok').length;
+  const perlu=Object.values(ST.results).filter(v=>v==='perlu').length;
+  const na=Object.values(ST.results).filter(v=>v==='na').length;
+  const pending=CHECKS.length-ok-perlu-na;
+  document.getElementById('sum-ok').textContent=ok;
+  document.getElementById('sum-perlu').textContent=perlu;
+  document.getElementById('sum-na').textContent=na;
+  document.getElementById('sum-pending').textContent=pending;
+  const list=document.getElementById('summary-list');
+  list.innerHTML=CHECKS.map((c,i)=>{
+    const s=ST.results[i];
+    const badge=s==='ok'?'<span class="badge badge-ok">✓ OK</span>':
+      s==='perlu'?'<span class="badge badge-perlu">⚠ Perlu</span>':
+      s==='na'?'<span class="badge badge-na">— N/A</span>':
+      '<span class="badge badge-pending">Belum</span>';
+    const ph=(ST.photos[i]||[]).length;
+    return `<div class="summary-row">
+      <div class="sr-left">
+        <div class="sr-bagian">${c.bagian}</div>
+        <div class="sr-point">${c.point}</div>
+        ${ph?`<div class="sr-note">📷 ${ph} foto terlampir</div>`:''}
+      </div>${badge}</div>`;
+  }).join('');
+}
+
+// ========== SUBMIT ==========
+function submitLaporan() {
+  const pic=document.getElementById('inp-pic').value.trim();
+  if(!pic){showToast('⚠️ Isi nama PIC/teknisi terlebih dahulu');return;}
+  const ok=Object.values(ST.results).filter(v=>v==='ok').length;
+  const perlu=Object.values(ST.results).filter(v=>v==='perlu').length;
+  const photos=Object.values(ST.photos).reduce((a,v)=>a+(v||[]).length,0);
+  document.getElementById('done-box').innerHTML=`
+    <div class="done-row"><span>Mesin</span><span class="dk">${document.getElementById('inp-no').value} — ${document.getElementById('inp-type').value}</span></div>
+    <div class="done-row"><span>Tanggal</span><span class="dk">${document.getElementById('inp-tgl').value}</span></div>
+    <div class="done-row"><span>PIC</span><span class="dk">${pic}</span></div>
+    <div class="done-row"><span>Item OK</span><span class="dk" style="color:#15803d">${ok} item</span></div>
+    <div class="done-row"><span>Perlu Tindakan</span><span class="dk" style="color:#d97706">${perlu} item</span></div>
+    <div class="done-row"><span>Foto terlampir</span><span class="dk">${photos} foto</span></div>`;
+  goTo(4);
+}
+
+// ========== DOWNLOAD CSV ==========
+function downloadCSV() {
+  const no=document.getElementById('inp-no').value;
+  const type=document.getElementById('inp-type').value;
+  const sn=document.getElementById('inp-sn').value;
+  const tgl=document.getElementById('inp-tgl').value;
+  const pic=document.getElementById('inp-pic').value;
+  const start=document.getElementById('inp-start').value;
+  const finish=document.getElementById('inp-finish').value;
+  let csv='CHECKLIST REPORT - ANGIN BOCOR (MFG 1)\n';
+  csv+=`No. Document,FM-MTN-10,No. Revisi,0\n\n`;
+  csv+=`No Mesin,${no},Type Mesin,${type},Serial,${sn}\n`;
+  csv+=`Tanggal,${tgl},Start,${start},Finish,${finish},PIC,${pic}\n\n`;
+  csv+='No,Bagian,Point Check,Standard,Status,Keterangan,Foto\n';
+  CHECKS.forEach((c,i)=>{
+    const s=ST.results[i]||'BELUM DIISI';
+    const statusLabel=s==='ok'?'OK':s==='perlu'?'PERLU TINDAKAN':s==='na'?'TIDAK ADA':'BELUM DIISI';
+    const note=(ST.notes[i]||'').replace(/,/g,' ').replace(/\n/g,' ');
+    const ph=(ST.photos[i]||[]).length;
+    csv+=`${i+1},"${c.bagian}","${c.point}","${c.std}",${statusLabel},"${note}",${ph} foto\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`PM_AnginBocor_${no}_${tgl}.csv`; a.click();
+  showToast('✅ File CSV berhasil didownload');
+}
+
+// ========== RESET ==========
+function resetApp() {
+  ST={results:{},notes:{},photos:{}};
+  ['inp-no','inp-type','inp-merk','inp-sn','inp-tahun','inp-pic'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  const d=new Date();
+  document.getElementById('inp-tgl').value=d.toISOString().split('T')[0];
+  document.getElementById('inp-start').value=d.toTimeString().slice(0,5);
+  document.getElementById('inp-finish').value='';
+  document.getElementById('machine-bar').classList.remove('show');
+  document.getElementById('no-machine-badge').classList.remove('show');
+  goTo(1);
+}
+
+// ========== TOAST ==========
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
