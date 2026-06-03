@@ -139,6 +139,23 @@ input[readonly]{background:#f8fafc;color:#64748b}
 .no-machine-badge{background:#fee2e2;color:#b91c1c;padding:8px 12px;border-radius:8px;font-size:13px;margin:0 10px 8px;text-align:center;display:none}
 .no-machine-badge.show{display:block}
 </style>
+@media print {
+
+body{
+background:white;
+}
+
+button,
+#login-screen{
+display:none;
+}
+
+.card{
+box-shadow:none;
+border:1px solid #000;
+}
+
+}
 </head>
 <body onload="checkLogin()">
   <!-- LOGIN SCREEN -->
@@ -386,8 +403,8 @@ Username / Password Salah
         <p style="font-size:19px;font-weight:700;margin-bottom:6px">Laporan Tersimpan!</p>
         <p style="font-size:13px;color:#64748b;margin-bottom:4px">Checklist PM angin bocor berhasil disimpan.</p>
         <div class="done-box" id="done-box"></div>
-        <button class="btn btn-secondary" onclick="downloadCSV()" style="margin-bottom:10px">
-          ⬇️ Download Laporan (CSV)
+        <button class="btn btn-secondary" onclick="downloadPDF()" style="margin-bottom:10px">
+          ⬇️ Download Laporan (PDF)
         </button>
         <button class="btn btn-primary" onclick="resetApp()">
           ➕ Periksa Mesin Berikutnya
@@ -868,32 +885,26 @@ function submitLaporan() {
   goTo(4);
 }
 
-// ========== DOWNLOAD CSV ==========
-function downloadCSV() {
-  const no=document.getElementById('inp-no').value;
-  const type=document.getElementById('inp-type').value;
-  const sn=document.getElementById('inp-sn').value;
-  const tgl=document.getElementById('inp-tgl').value;
-  const pic=document.getElementById('inp-pic').value;
-  const start=document.getElementById('inp-start').value;
-  const finish=document.getElementById('inp-finish').value;
-  let csv='CHECKLIST REPORT - ANGIN BOCOR (MFG 1)\n';
-  csv+=`No. Document,FM-MTN-10,No. Revisi,0\n\n`;
-  csv+=`No Mesin,${no},Type Mesin,${type},Serial,${sn}\n`;
-  csv+=`Tanggal,${tgl},Start,${start},Finish,${finish},PIC,${pic}\n\n`;
-  csv+='No,Bagian,Point Check,Standard,Status,Keterangan,Foto\n';
-  CHECKS.forEach((c,i)=>{
-    const s=ST.results[i]||'BELUM DIISI';
-    const statusLabel=s==='ok'?'OK':s==='perlu'?'PERLU TINDAKAN':s==='na'?'TIDAK ADA':'BELUM DIISI';
-    const note=(ST.notes[i]||'').replace(/,/g,' ').replace(/\n/g,' ');
-    const ph=(ST.photos[i]||[]).length;
-    csv+=`${i+1},"${c.bagian}","${c.point}","${c.std}",${statusLabel},"${note}",${ph} foto\n`;
-  });
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=`PM_AnginBocor_${no}_${tgl}.csv`; a.click();
-  showToast('✅ File CSV berhasil didownload');
+function downloadPDF() {
+
+const element = document.body;
+
+const opt = {
+  margin: 0.5,
+  filename: 'PM_AnginBocor.pdf',
+  image: { type: 'jpeg', quality: 1 },
+  html2canvas: { scale: 2 },
+  jsPDF: {
+    unit: 'in',
+    format: 'a4',
+    orientation: 'portrait'
+  }
+};
+
+html2pdf().set(opt).from(element).save();
+
+showToast('✅ File PDF berhasil didownload');
+
 }
 
 // ========== RESET ==========
@@ -947,5 +958,7 @@ document.getElementById("login-screen").style.display = "none";
 }
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 </body>
 </html>
