@@ -28,7 +28,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .field-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .field-row.full{grid-template-columns:1fr}
-input[type=text],input[type=time],input[type=date],select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;color:#1a1a1a;-webkit-appearance:none;transition:border-color .2s}
+input[type=text],input[type=time],input[type=date],select{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;color:#1a1a1a;
+appearance:none;
+-webkit-appearance:none;transition:border-color .2s}
 input:focus,select:focus{outline:none;border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,.12)}
 input[readonly]{background:#f8fafc;color:#64748b}
 /* SEARCH / AUTOCOMPLETE */
@@ -828,6 +830,35 @@ function showToast(msg) {
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
 }
+function login() {
+
+const user = document.getElementById("username").value;
+const pass = document.getElementById("password").value;
+
+if(user === "maintenance" && pass === "maintenance") {
+
+localStorage.setItem("login","true");
+
+document.getElementById("login-screen").style.display = "none";
+
+} else {
+
+document.getElementById("login-error").style.display = "block";
+
+}
+
+}
+
+function checkLogin(){
+
+if(localStorage.getItem("login") === "true"){
+
+document.getElementById("login-screen").style.display = "none";
+
+}
+
+}
+
 </script>
 </body>
 </html>
